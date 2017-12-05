@@ -8,48 +8,33 @@ var burger = require("../models/burger.js");
 
 router.get("/", function (req, res) {
 
-    burger.selectAll(function (data) {
+    burger.show(function (data) {
 
-        var hbsObject = {
-            burgers: data
+        var dat1 = {
+            burgerData: data
         };
 
-        console.log(hbsObject);
-        res.render("index", hbsObject);
+        res.render("index", dat1);
 
     });
 
 });
 
-router.post("/api/burgers", function (req, res) {
+router.post("/create", function (req, res) {
 
-    burger.insertOne([
-        "burger_name", "devoured"
-    ], [
-            req.body.burger_name, req.body.devoured
-        ], function (result) {
+    burger.add(req.body.item, function (data) {
 
-            res.json({ id: result.insertId });
+        res, redirect('/');
 
-        });
+    });
 
 });
 
-router.put("/api/burgers/:id", function (req, res) {
+router.post("/update/:id", function (req, res) {
 
-    var condition = "id = " + req.params.id;
+    burger.eat(req.body.item, function (data) {
 
-    console.log("condition", condition);
-
-    burger.updateOne({
-        devoured: req.body.devoured
-    }, condition, function (result) {
-
-        if (result.changedRows == 0) {
-            return res.status(404).end();
-        } else {
-            res.status(200).end();
-        }
+        res.redirect('/');
 
     });
 

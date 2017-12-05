@@ -1,31 +1,22 @@
 var connection = require("../config/connection.js");
 
-function objToSql(ob) {
-    var arr = [];
+connection.connect(function (err) {
 
-    for (var key in ob) {
-        var value = ob[key];
-
-        if (Object.hasOwnProperty.call(ob, key)) {
-
-            if (typeof value === "string" && value.indexOf(" ") >= 0) {
-                value = "'" + value + "'";
-            }
-
-            arr.push(key + "=" + value);
-
-        }
+    if (err) {
+        console.log("error connecting: " + err.stack);
+        return;
     }
 
-    return arr.toString();
+    console.log("connected as id: " + connection.threadId);
 
-}
+});
 
 var orm = {
 
-    selectAll: function (tableInput, cb) {
+    addBurger: function (burger, cb) {
 
-        var queryString = "SELECT * FROM " + tableInput + ";";
+        var burgerName = burger;
+        var queryString = "INSERT INTO burgers (burger_name) VALUES ('" + burgerName + "') " + tableInput + ";";
         connection.query(queryString, function (err, result) {
 
             if (err) {
@@ -38,20 +29,9 @@ var orm = {
 
     },
 
-    insertOne: function (table, cols, vals, cb) {
+    eatBurger: function (id, cb) {
 
-        var queryString = "INSERT INTO " + table;
-
-        queryString += " (";
-        queryString += cols.toString();
-        queryString += ") ";
-        queryString += "VALUES (";
-        queryString += vals.length;
-        queryString += ") ";
-
-        console.log(queryString);
-
-        connection.query(queryString, vals, function (err, result) {
+        connection.query("UPDATE burgers SET devoured = 1 WHERE id = ?", [id], function (err, result) {
 
             if (err) {
                 throw err;
@@ -63,18 +43,9 @@ var orm = {
 
     },
 
-    updateOne: function (table, objColVals, condition, cb) {
+    showBurgers: function (tableName, cb) {
 
-        var queryString = "UPDATE " + table;
-
-        queryString += " SET ";
-        queryString += objToSql(objColVals);
-        queryString += " WHERE ";
-        queryString += condition;
-
-        console.log(queryString);
-
-        connection.query(queryString, function (err, result) {
+        connection.query("SELECT * FROM burgers", function (err, result) {
 
             if (err) {
                 throw err;
